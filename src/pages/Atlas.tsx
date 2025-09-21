@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,49 +22,7 @@ import {
   Share2
 } from "lucide-react";
 import { mockFRAClaims, mockAssets } from "@/data/mockData";
-
-// Mock Mapbox component since we need API key
-const MapboxMap = () => {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
-
-  useEffect(() => {
-    // Simulate map loading
-    setTimeout(() => setMapLoaded(true), 1000);
-  }, []);
-
-  return (
-    <div ref={mapContainer} className="w-full h-full bg-muted rounded-lg relative overflow-hidden">
-      {!mapLoaded ? (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading Interactive Map...</p>
-            <p className="text-xs text-muted-foreground mt-2">Configure Mapbox API key to enable mapping</p>
-          </div>
-        </div>
-      ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-fra-forest/20 to-fra-earth/20">
-          <div className="absolute inset-4 border-2 border-dashed border-primary/30 rounded-lg flex items-center justify-center">
-            <div className="text-center p-8">
-              <MapPin className="h-16 w-16 text-primary mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">Interactive FRA Atlas</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                This would show Mapbox GL JS with FRA claims, boundaries, and satellite assets
-              </p>
-              <div className="flex flex-wrap gap-2 justify-center">
-                <Badge variant="secondary">IFR Claims</Badge>
-                <Badge variant="secondary">Community Rights</Badge>
-                <Badge variant="secondary">Forest Resources</Badge>
-                <Badge variant="secondary">Water Bodies</Badge>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
+import LeafletMap from "@/components/map/LeafletMap";
 
 export default function Atlas() {
   const [selectedState, setSelectedState] = useState("");
@@ -72,6 +30,7 @@ export default function Atlas() {
   const [selectedClaimType, setSelectedClaimType] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeLayer, setActiveLayer] = useState("claims");
+  const [selectedClaim, setSelectedClaim] = useState<string | null>(null);
 
   const states = ["Madhya Pradesh", "Tripura", "Odisha", "Telangana"];
   const districts = {
@@ -89,11 +48,8 @@ export default function Atlas() {
                             claim.village.toLowerCase().includes(searchQuery.toLowerCase()));
   });
 
-  const layerIcons = {
-    claims: TreePine,
-    assets: Layers,
-    water: Droplets,
-    settlements: Home
+  const handleClaimClick = (claim: any) => {
+    setSelectedClaim(claim.id);
   };
 
   return (
@@ -262,7 +218,9 @@ export default function Atlas() {
                     animate={{ opacity: 1, x: 0 }}
                     className="group"
                   >
-                    <Card className="p-3 hover:shadow-soft transition-all cursor-pointer">
+                    <Card className={`p-3 hover:shadow-soft transition-all cursor-pointer ${
+                      selectedClaim === claim.id ? 'ring-2 ring-primary shadow-soft' : ''
+                    }`}>
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <h4 className="text-sm font-medium text-foreground">
@@ -300,36 +258,25 @@ export default function Atlas() {
 
         {/* Map Area */}
         <div className="flex-1 relative">
-          <MapboxMap />
+          <LeafletMap 
+            claims={filteredClaims}
+            assets={mockAssets}
+            selectedState={selectedState}
+            selectedDistrict={selectedDistrict}
+            onClaimClick={handleClaimClick}
+          />
           
           {/* Map Controls */}
           <div className="absolute top-4 right-4 space-y-2">
-            <Button variant="secondary" size="icon" className="bg-background/90 backdrop-blur">
-              <ZoomIn className="h-4 w-4" />
-            </Button>
-            <Button variant="secondary" size="icon" className="bg-background/90 backdrop-blur">
-              <Layers className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Legend */}
-          <Card className="absolute bottom-4 left-4 p-4 bg-background/90 backdrop-blur">
-            <h4 className="text-sm font-medium mb-3">Legend</h4>
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 rounded-full bg-fra-success"></div>
-                <span className="text-xs">Approved Claims</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 rounded-full bg-fra-warning"></div>
-                <span className="text-xs">Pending Claims</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 rounded-full bg-destructive"></div>
-                <span className="text-xs">Rejected Claims</span>
-              </div>
+            <div className="flex flex-col space-y-2">
+              <Badge variant="secondary" className="bg-background/90 backdrop-blur text-xs">
+                Claims: {filteredClaims.length}
+              </Badge>
+              <Badge variant="secondary" className="bg-background/90 backdrop-blur text-xs">
+                Assets: {mockAssets.length}
+              </Badge>
             </div>
-          </Card>
+          </div>
         </div>
       </div>
     </div>
