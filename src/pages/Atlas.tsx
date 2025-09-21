@@ -107,12 +107,12 @@ export default function Atlas() {
               <div className="space-y-3">
                 <div>
                   <Label className="text-xs text-muted-foreground">State</Label>
-                  <Select value={selectedState} onValueChange={setSelectedState}>
+                  <Select value={selectedState} onValueChange={(value) => setSelectedState(value === "all" ? "" : value)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select state" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All States</SelectItem>
+                      <SelectItem value="all">All States</SelectItem>
                       {states.map(state => (
                         <SelectItem key={state} value={state}>{state}</SelectItem>
                       ))}
@@ -122,12 +122,12 @@ export default function Atlas() {
 
                 <div>
                   <Label className="text-xs text-muted-foreground">District</Label>
-                  <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
+                  <Select value={selectedDistrict} onValueChange={(value) => setSelectedDistrict(value === "all" ? "" : value)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select district" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Districts</SelectItem>
+                      <SelectItem value="all">All Districts</SelectItem>
                       {selectedState && districts[selectedState as keyof typeof districts]?.map(district => (
                         <SelectItem key={district} value={district}>{district}</SelectItem>
                       ))}
@@ -137,12 +137,12 @@ export default function Atlas() {
 
                 <div>
                   <Label className="text-xs text-muted-foreground">Claim Type</Label>
-                  <Select value={selectedClaimType} onValueChange={setSelectedClaimType}>
+                  <Select value={selectedClaimType} onValueChange={(value) => setSelectedClaimType(value === "all" ? "" : value)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select claim type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Types</SelectItem>
+                      <SelectItem value="all">All Types</SelectItem>
                       <SelectItem value="IFR">Individual Forest Rights (IFR)</SelectItem>
                       <SelectItem value="CR">Community Rights (CR)</SelectItem>
                       <SelectItem value="CFR">Community Forest Resource (CFR)</SelectItem>
