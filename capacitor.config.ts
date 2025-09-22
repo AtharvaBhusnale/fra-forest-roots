@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.3a9d07a3f7da439ab947502d43b8adb3',
+  appId: 'com.lovable.fraforestatlas',
   appName: 'fra-forest-roots',
   webDir: 'dist',
   server: {
