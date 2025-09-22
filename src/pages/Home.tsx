@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { mockStats } from "@/data/mockData";
-import fraLogo from "@/assets/fra-atlas-logo.png";
+import fraLogo from "@/assets/fra-logo.png";
 
 export default function Home() {
   const features = [
