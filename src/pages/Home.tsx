@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { mockStats } from "@/data/mockData";
+import fraLogo from "@/assets/fra-logo.png";
 
 export default function Home() {
   const features = [
@@ -72,8 +73,8 @@ export default function Home() {
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-primary shadow-glow">
-              <TreePine className="h-10 w-10 text-primary-foreground" />
+            <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-glow">
+              <img src={fraLogo} alt="FRA Atlas Logo" className="h-12 w-12 object-contain" />
             </div>
             <h1 className="mx-auto max-w-4xl text-4xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
               AI-Powered{" "}
