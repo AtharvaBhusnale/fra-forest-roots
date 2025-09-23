@@ -14,7 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      claims: {
+        Row: {
+          claim_description: string
+          claim_type: string
+          district: string
+          documents: Json | null
+          id: string
+          land_area: number | null
+          remarks: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          state: string
+          status: string
+          submitted_at: string
+          user_id: string
+          village: string
+        }
+        Insert: {
+          claim_description: string
+          claim_type: string
+          district: string
+          documents?: Json | null
+          id?: string
+          land_area?: number | null
+          remarks?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          state: string
+          status?: string
+          submitted_at?: string
+          user_id: string
+          village: string
+        }
+        Update: {
+          claim_description?: string
+          claim_type?: string
+          district?: string
+          documents?: Json | null
+          id?: string
+          land_area?: number | null
+          remarks?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          state?: string
+          status?: string
+          submitted_at?: string
+          user_id?: string
+          village?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          phone: string | null
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          phone?: string | null
+          role?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import StatsCard from "@/components/common/StatsCard";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   MapPin, 
   Brain, 
@@ -15,13 +16,17 @@ import {
   ArrowRight,
   Satellite,
   Database,
-  Shield
+  Shield,
+  LogIn,
+  UserPlus,
+  FileText
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { mockStats } from "@/data/mockData";
 import fraLogo from "@/assets/fra-logo.png";
 
 export default function Home() {
+  const { user, isOfficial, isCitizen } = useAuth();
   const features = [
     {
       icon: Database,
@@ -88,24 +93,62 @@ export default function Home() {
               recommendations for CSS scheme eligibility. Empowering forest communities with technology.
             </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center">
-              <Button variant="hero" size="xl" asChild>
-                <Link to="/atlas">
-                  <MapPin className="mr-2 h-5 w-5" />
-                  Explore Atlas
-                </Link>
-              </Button>
-              <Button variant="outline" size="xl" asChild>
-                <Link to="/dss">
-                  <Brain className="mr-2 h-5 w-5" />
-                  Try DSS
-                </Link>
-              </Button>
-              <Button variant="earth" size="xl" asChild>
-                <Link to="/digitization">
-                  <Upload className="mr-2 h-5 w-5" />
-                  Upload Data
-                </Link>
-              </Button>
+              {!user ? (
+                <>
+                  <Button variant="hero" size="xl" asChild>
+                    <Link to="/auth">
+                      <LogIn className="mr-2 h-5 w-5" />
+                      Sign In
+                    </Link>
+                  </Button>
+                  
+                  <Button variant="outline" size="xl" asChild>
+                    <Link to="/auth">
+                      <UserPlus className="mr-2 h-5 w-5" />
+                      Register
+                    </Link>
+                  </Button>
+                </>
+              ) : isOfficial ? (
+                <>
+                  <Button variant="hero" size="xl" asChild>
+                    <Link to="/atlas">
+                      <MapPin className="mr-2 h-5 w-5" />
+                      Explore Atlas
+                    </Link>
+                  </Button>
+                  
+                  <Button variant="outline" size="xl" asChild>
+                    <Link to="/dss">
+                      <Brain className="mr-2 h-5 w-5" />
+                      Try DSS
+                    </Link>
+                  </Button>
+                  
+                  <Button variant="earth" size="xl" asChild>
+                    <Link to="/dashboard">
+                      <Database className="mr-2 h-5 w-5" />
+                      Dashboard
+                    </Link>
+                  </Button>
+                </>
+              ) : isCitizen ? (
+                <>
+                  <Button variant="hero" size="xl" asChild>
+                    <Link to="/apply-claim">
+                      <FileText className="mr-2 h-5 w-5" />
+                      Apply for Claim
+                    </Link>
+                  </Button>
+                  
+                  <Button variant="outline" size="xl" asChild>
+                    <Link to="/my-claims">
+                      <Database className="mr-2 h-5 w-5" />
+                      View My Claims
+                    </Link>
+                  </Button>
+                </>
+              ) : null}
             </div>
           </motion.div>
         </div>
