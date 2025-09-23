@@ -25,8 +25,7 @@ const AuthPage = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    full_name: '',
-    role: 'citizen' as 'official' | 'citizen'
+    full_name: ''
   });
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -77,7 +76,7 @@ const AuthPage = () => {
     try {
       const { error } = await signUp(signUpForm.email, signUpForm.password, {
         full_name: signUpForm.full_name,
-        role: signUpForm.role
+        role: 'citizen'
       });
       
       if (error) {
@@ -171,16 +170,12 @@ const AuthPage = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="role">User Type</Label>
-                  <Select value={signUpForm.role} onValueChange={(value: 'official' | 'citizen') => setSignUpForm({ ...signUpForm, role: value })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select user type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="citizen">Citizen</SelectItem>
-                      <SelectItem value="official">Government Official</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <p className="text-sm text-muted-foreground">
+                    Registering as: <span className="font-medium text-foreground">Citizen</span>
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Government officials are registered through official channels.
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Password</Label>

@@ -21,6 +21,7 @@ All colors MUST be HSL.
     --primary: 142 71% 25%;
     --primary-foreground: 44 21% 99%;
     --primary-glow: 142 71% 35%;
+    --primary-dark: 142 71% 20%;
 
     /* Earth Tone Secondary */
     --secondary: 35 25% 88%;
@@ -97,6 +98,7 @@ All colors MUST be HSL.
     --primary: 142 71% 45%;
     --primary-foreground: 142 15% 8%;
     --primary-glow: 142 71% 55%;
+    --primary-dark: 142 71% 30%;
 
     --secondary: 35 15% 15%;
     --secondary-foreground: 44 21% 95%;
