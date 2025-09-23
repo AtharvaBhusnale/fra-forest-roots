@@ -130,12 +130,14 @@ export default function About() {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary">React</Badge>
+                  <Badge variant="secondary">React 18.3.1</Badge>
                   <Badge variant="secondary">TypeScript</Badge>
-                  <Badge variant="secondary">TailwindCSS</Badge>
-                  <Badge variant="secondary">Framer Motion</Badge>
-                  <Badge variant="secondary">ShadCN/UI</Badge>
                   <Badge variant="secondary">Vite</Badge>
+                  <Badge variant="secondary">Tailwind CSS</Badge>
+                  <Badge variant="secondary">Framer Motion</Badge>
+                  <Badge variant="secondary">Radix UI</Badge>
+                  <Badge variant="secondary">shadcn/ui</Badge>
+                  <Badge variant="secondary">React Router v6</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -144,17 +146,17 @@ export default function About() {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Globe className="h-5 w-5 text-primary" />
-                  <span>Mapping & GIS</span>
+                  <span>Backend & Database</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary">Mapbox GL JS</Badge>
-                  <Badge variant="secondary">Leaflet</Badge>
-                  <Badge variant="secondary">GeoJSON</Badge>
-                  <Badge variant="secondary">PostGIS</Badge>
-                  <Badge variant="secondary">QGIS</Badge>
-                  <Badge variant="secondary">Satellite Imagery</Badge>
+                  <Badge variant="secondary">Supabase</Badge>
+                  <Badge variant="secondary">PostgreSQL</Badge>
+                  <Badge variant="secondary">Row Level Security</Badge>
+                  <Badge variant="secondary">Edge Functions</Badge>
+                  <Badge variant="secondary">Real-time</Badge>
+                  <Badge variant="secondary">Authentication</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -163,17 +165,17 @@ export default function About() {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Lightbulb className="h-5 w-5 text-primary" />
-                  <span>AI & Backend</span>
+                  <span>Mapping & AI</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary">OCR</Badge>
-                  <Badge variant="secondary">NER</Badge>
-                  <Badge variant="secondary">Machine Learning</Badge>
-                  <Badge variant="secondary">Node.js</Badge>
-                  <Badge variant="secondary">PostgreSQL</Badge>
-                  <Badge variant="secondary">Docker</Badge>
+                  <Badge variant="secondary">Leaflet</Badge>
+                  <Badge variant="secondary">React Leaflet</Badge>
+                  <Badge variant="secondary">GeoJSON</Badge>
+                  <Badge variant="secondary">PostGIS</Badge>
+                  <Badge variant="secondary">TanStack Query</Badge>
+                  <Badge variant="secondary">Satellite Imagery</Badge>
                 </div>
               </CardContent>
             </Card>
