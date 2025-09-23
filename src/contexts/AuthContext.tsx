@@ -7,7 +7,7 @@ interface Profile {
   user_id: string;
   email: string;
   full_name: string;
-  role: 'official' | 'citizen';
+  role: 'official' | 'citizen' | 'super_admin';
   phone?: string;
   address?: string;
   created_at: string;
@@ -19,7 +19,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
-  signUp: (email: string, password: string, userData: { full_name: string; role: 'official' | 'citizen' }) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, userData: { full_name: string; role: 'official' | 'citizen' | 'super_admin' }) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   isOfficial: boolean;
@@ -88,7 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, userData: { full_name: string; role: 'official' | 'citizen' }) => {
+  const signUp = async (email: string, password: string, userData: { full_name: string; role: 'official' | 'citizen' | 'super_admin' }) => {
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({

@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requireRole?: 'official' | 'citizen';
+  requireRole?: 'official' | 'citizen' | 'super_admin';
   fallbackPath?: string;
 }
 

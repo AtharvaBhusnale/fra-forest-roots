@@ -16,7 +16,8 @@ import {
   LogIn,
   LogOut,
   User,
-  FileText
+  FileText,
+  Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -43,7 +44,11 @@ const Navbar = () => {
     ];
 
     if (user) {
-      if (isOfficial) {
+      if (profile?.role === 'super_admin') {
+        baseItems.push(
+          { name: "Admin Dashboard", path: "/admin", icon: Shield }
+        );
+      } else if (isOfficial) {
         baseItems.push(
           { name: "Atlas", path: "/atlas", icon: Map },
           { name: "DSS", path: "/dss", icon: BarChart3 },
