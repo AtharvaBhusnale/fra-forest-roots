@@ -24,6 +24,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   isOfficial: boolean;
   isCitizen: boolean;
+  isSuperAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -118,6 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isOfficial = profile?.role === 'official';
   const isCitizen = profile?.role === 'citizen';
+  const isSuperAdmin = profile?.role === 'super_admin';
 
   const value = {
     user,
@@ -128,7 +130,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signIn,
     signOut,
     isOfficial,
-    isCitizen
+    isCitizen,
+    isSuperAdmin
   };
 
   return (

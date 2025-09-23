@@ -26,7 +26,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const location = useLocation();
-  const { user, profile, signOut, isOfficial, isCitizen } = useAuth();
+  const { user, profile, signOut, isOfficial, isCitizen, isSuperAdmin } = useAuth();
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
