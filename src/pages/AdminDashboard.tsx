@@ -98,40 +98,34 @@ const AdminDashboard = () => {
     setIsLoading(true);
 
     try {
-      // Create auth user
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: newOfficialForm.email,
-        password: newOfficialForm.password,
-        email_confirm: true,
-        user_metadata: {
-          full_name: newOfficialForm.full_name,
-          role: 'official'
-        }
-      });
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
 
-      if (authError) throw authError;
-
-      // Create profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          user_id: authData.user.id,
+      const response = await fetch('/supabase/functions/v1/create-official', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
           email: newOfficialForm.email,
+          password: newOfficialForm.password,
           full_name: newOfficialForm.full_name,
-          role: 'official'
-        });
-
-      if (profileError) throw profileError;
-
-      // Log admin action
-      await logAdminAction('create_official', authData.user.id, {
-        email: newOfficialForm.email,
-        full_name: newOfficialForm.full_name
+        }),
       });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create official account');
+      }
 
       toast({
         title: "Official Account Created",
-        description: `Account created for ${newOfficialForm.full_name}`
+        description: result.message
       });
 
       setNewOfficialForm({ email: '', password: '', full_name: '' });
