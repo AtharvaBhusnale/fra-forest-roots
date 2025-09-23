@@ -104,7 +104,7 @@ const AdminDashboard = () => {
         throw new Error('Not authenticated');
       }
 
-      const response = await fetch('/supabase/functions/v1/create-official', {
+      const response = await fetch('https://mmgvjkfddijuayrgrkrb.supabase.co/functions/v1/create-official', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
