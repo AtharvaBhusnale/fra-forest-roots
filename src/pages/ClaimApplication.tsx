@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, FileText, Upload } from 'lucide-react';
+import DocumentUpload from '@/components/documents/DocumentUpload';
 
 const ClaimApplication = () => {
   const { user } = useAuth();
@@ -23,6 +24,7 @@ const ClaimApplication = () => {
     land_area: '',
     claim_description: ''
   });
+  const [documents, setDocuments] = useState<any[]>([]);
 
   const states = [
     'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
@@ -47,7 +49,7 @@ const ClaimApplication = () => {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
+      const { data: claimData, error } = await supabase
         .from('claims')
         .insert({
           user_id: user.id,
@@ -56,8 +58,11 @@ const ClaimApplication = () => {
           district: formData.district,
           state: formData.state,
           land_area: parseFloat(formData.land_area),
-          claim_description: formData.claim_description
-        });
+          claim_description: formData.claim_description,
+          documents: documents
+        })
+        .select()
+        .single();
 
       if (error) {
         throw error;
@@ -77,6 +82,7 @@ const ClaimApplication = () => {
         land_area: '',
         claim_description: ''
       });
+      setDocuments([]);
 
     } catch (error: any) {
       toast({
@@ -192,21 +198,10 @@ const ClaimApplication = () => {
                 />
               </div>
 
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <h3 className="font-medium mb-2 flex items-center gap-2">
-                  <Upload className="h-4 w-4" />
-                  Document Upload (Optional)
-                </h3>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Upload supporting documents for your claim (land records, identity proof, etc.)
-                </p>
-                <Input
-                  type="file"
-                  multiple
-                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                  className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold"
-                />
-              </div>
+              <DocumentUpload
+                onUploadComplete={(uploadedDocuments) => setDocuments(uploadedDocuments)}
+                existingDocuments={documents}
+              />
 
               <div className="flex gap-4">
                 <Button 

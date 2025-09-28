@@ -120,7 +120,7 @@ serve(async (req) => {
     console.error('Error:', error)
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'An error occurred while creating the official account' 
+        error: (error as any)?.message || 'An error occurred while creating the official account' 
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

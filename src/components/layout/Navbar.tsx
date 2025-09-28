@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import NotificationBell from "@/components/notifications/NotificationBell";
+import GlobalSearch from "@/components/search/GlobalSearch";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);

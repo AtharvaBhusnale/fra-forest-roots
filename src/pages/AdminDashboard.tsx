@@ -9,7 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Shield, UserPlus, Users, Activity } from 'lucide-react';
+import { Loader2, Shield, UserPlus, Users, Activity, FileText } from 'lucide-react';
+import ClaimsTable from '@/components/claims/ClaimsTable';
 
 interface AdminAction {
   id: string;
@@ -176,8 +177,12 @@ const AdminDashboard = () => {
           <p className="text-muted-foreground">Manage government officials and system administration</p>
         </div>
 
-        <Tabs defaultValue="create-official" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs defaultValue="claims-review" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="claims-review" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Claims Review
+            </TabsTrigger>
             <TabsTrigger value="create-official" className="flex items-center gap-2">
               <UserPlus className="h-4 w-4" />
               Create Official
@@ -191,6 +196,10 @@ const AdminDashboard = () => {
               Audit Log
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="claims-review">
+            <ClaimsTable />
+          </TabsContent>
 
           <TabsContent value="create-official">
             <Card>
