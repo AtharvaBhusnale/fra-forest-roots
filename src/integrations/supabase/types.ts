@@ -95,6 +95,72 @@ export type Database = {
         }
         Relationships: []
       }
+      exports: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          export_type: string
+          file_url: string | null
+          filters: Json | null
+          id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          export_type: string
+          file_url?: string | null
+          filters?: Json | null
+          id?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          export_type?: string
+          file_url?: string | null
+          filters?: Json | null
+          id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          read: boolean
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean
+          title: string
+          type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
@@ -102,6 +168,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          notification_preferences: Json | null
           phone: string | null
           role: string
           updated_at: string
@@ -113,6 +180,7 @@ export type Database = {
           email: string
           full_name: string
           id?: string
+          notification_preferences?: Json | null
           phone?: string | null
           role?: string
           updated_at?: string
@@ -124,6 +192,7 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          notification_preferences?: Json | null
           phone?: string | null
           role?: string
           updated_at?: string
