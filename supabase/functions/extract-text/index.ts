@@ -42,14 +42,14 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: "You are an OCR expert. Extract all text from the provided document image. Maintain the structure and formatting as much as possible. If you can identify specific fields like names, addresses, villages, districts, states, claim types, coordinates, or land areas, note them. Return the raw extracted text first, then if possible, provide structured data in JSON format with fields: claimantName, village, district, state, claimType, coordinates, area."
+            content: "You are an OCR expert. Extract all text from the provided document image IN ENGLISH ONLY. If the document is in another language, translate it to English while extracting. Maintain the structure and formatting as much as possible. If you can identify specific fields like names, addresses, villages, districts, states, claim types, coordinates, or land areas, note them. Return the raw extracted text first, then if possible, provide structured data in JSON format with fields: claimantName, village, district, state, claimType, coordinates, area. ALL OUTPUT MUST BE IN ENGLISH."
           },
           {
             role: "user",
             content: [
               {
                 type: "text",
-                text: "Extract all text from this document image and identify any FRA (Forest Rights Act) related information."
+                text: "Extract all text from this document image in English and identify any FRA (Forest Rights Act) related information. If the text is in another language, translate it to English."
               },
               {
                 type: "image_url",
