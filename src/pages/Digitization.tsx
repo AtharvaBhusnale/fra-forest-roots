@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Upload, 
   FileText, 
@@ -31,9 +33,11 @@ interface ExtractedData {
   coordinates: string;
   area: string;
   confidence: number;
+  rawText?: string;
 }
 
 export default function Digitization() {
+  const { toast } = useToast();
   const [files, setFiles] = useState<FileList | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -51,37 +55,90 @@ export default function Digitization() {
 
     setIsProcessing(true);
     setProgress(0);
+    setProcessingStep("Preparing images...");
 
-    // Simulate OCR and NER processing
-    const steps = [
-      { step: "Uploading files...", duration: 1000 },
-      { step: "Running OCR extraction...", duration: 2000 },
-      { step: "Applying NER for entity recognition...", duration: 1500 },
-      { step: "Validating extracted data...", duration: 1000 },
-      { step: "Generating structured output...", duration: 500 }
-    ];
+    try {
+      const file = files[0]; // Process first file
+      
+      // Convert to base64
+      setProcessingStep("Converting image...");
+      setProgress(20);
+      
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onload = () => {
+          const result = reader.result as string;
+          resolve(result);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
 
-    for (let i = 0; i < steps.length; i++) {
-      setProcessingStep(steps[i].step);
-      setProgress((i + 1) * 20);
-      await new Promise(resolve => setTimeout(resolve, steps[i].duration));
+      const base64Image = await base64Promise;
+
+      // Call AI extraction
+      setProcessingStep("Running AI OCR extraction...");
+      setProgress(40);
+
+      const { data, error } = await supabase.functions.invoke('extract-text', {
+        body: { image: base64Image }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      setProcessingStep("Processing extracted data...");
+      setProgress(70);
+
+      if (data.structuredData) {
+        // Use structured data if available
+        setExtractedData({
+          claimantName: data.structuredData.claimantName || "",
+          village: data.structuredData.village || "",
+          district: data.structuredData.district || "",
+          state: data.structuredData.state || "",
+          claimType: data.structuredData.claimType || "",
+          coordinates: data.structuredData.coordinates || "",
+          area: data.structuredData.area || "",
+          confidence: data.confidence || 0.85,
+          rawText: data.rawText
+        });
+      } else {
+        // Fallback to raw text only
+        setExtractedData({
+          claimantName: "",
+          village: "",
+          district: "",
+          state: "",
+          claimType: "",
+          coordinates: "",
+          area: "",
+          confidence: data.confidence || 0.75,
+          rawText: data.rawText
+        });
+      }
+
+      setProcessingStep("Processing completed!");
+      setProgress(100);
+      
+      toast({
+        title: "Success",
+        description: "Text extracted successfully from document",
+      });
+
+    } catch (error) {
+      console.error('Error processing file:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to extract text",
+        variant: "destructive",
+      });
+      setProgress(0);
+      setProcessingStep("");
+    } finally {
+      setIsProcessing(false);
     }
-
-    // Mock extracted data
-    setExtractedData({
-      claimantName: "Ravi Kumar Singh",
-      village: "Khandwa",
-      district: "Khandwa",
-      state: "Madhya Pradesh",
-      claimType: "Individual Forest Rights (IFR)",
-      coordinates: "76.3569, 21.8245",
-      area: "2.5 hectares",
-      confidence: 0.92
-    });
-
-    setProcessingStep("Processing completed!");
-    setProgress(100);
-    setIsProcessing(false);
   };
 
   const saveData = () => {
@@ -302,35 +359,83 @@ export default function Digitization() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
+                    {extractedData.rawText && (
+                      <div className="mb-4">
+                        <Label className="text-sm font-medium text-muted-foreground">Raw Extracted Text</Label>
+                        <Textarea 
+                          value={extractedData.rawText} 
+                          className="mt-1 min-h-[120px] font-mono text-xs"
+                          readOnly
+                        />
+                      </div>
+                    )}
+                    
+                    <Separator />
+                    
                     <div className="grid gap-4 md:grid-cols-2">
                       <div>
                         <Label className="text-sm font-medium text-muted-foreground">Claimant Name</Label>
-                        <Input value={extractedData.claimantName} className="mt-1" />
+                        <Input 
+                          value={extractedData.claimantName} 
+                          onChange={(e) => setExtractedData({...extractedData, claimantName: e.target.value})}
+                          className="mt-1" 
+                          placeholder="Enter claimant name"
+                        />
                       </div>
                       <div>
                         <Label className="text-sm font-medium text-muted-foreground">Village</Label>
-                        <Input value={extractedData.village} className="mt-1" />
+                        <Input 
+                          value={extractedData.village} 
+                          onChange={(e) => setExtractedData({...extractedData, village: e.target.value})}
+                          className="mt-1"
+                          placeholder="Enter village"
+                        />
                       </div>
                       <div>
                         <Label className="text-sm font-medium text-muted-foreground">District</Label>
-                        <Input value={extractedData.district} className="mt-1" />
+                        <Input 
+                          value={extractedData.district} 
+                          onChange={(e) => setExtractedData({...extractedData, district: e.target.value})}
+                          className="mt-1"
+                          placeholder="Enter district"
+                        />
                       </div>
                       <div>
                         <Label className="text-sm font-medium text-muted-foreground">State</Label>
-                        <Input value={extractedData.state} className="mt-1" />
+                        <Input 
+                          value={extractedData.state} 
+                          onChange={(e) => setExtractedData({...extractedData, state: e.target.value})}
+                          className="mt-1"
+                          placeholder="Enter state"
+                        />
                       </div>
                       <div>
                         <Label className="text-sm font-medium text-muted-foreground">Claim Type</Label>
-                        <Input value={extractedData.claimType} className="mt-1" />
+                        <Input 
+                          value={extractedData.claimType} 
+                          onChange={(e) => setExtractedData({...extractedData, claimType: e.target.value})}
+                          className="mt-1"
+                          placeholder="Enter claim type"
+                        />
                       </div>
                       <div>
                         <Label className="text-sm font-medium text-muted-foreground">Area</Label>
-                        <Input value={extractedData.area} className="mt-1" />
+                        <Input 
+                          value={extractedData.area} 
+                          onChange={(e) => setExtractedData({...extractedData, area: e.target.value})}
+                          className="mt-1"
+                          placeholder="Enter area"
+                        />
                       </div>
                     </div>
                     <div>
                       <Label className="text-sm font-medium text-muted-foreground">Coordinates</Label>
-                      <Input value={extractedData.coordinates} className="mt-1" />
+                      <Input 
+                        value={extractedData.coordinates} 
+                        onChange={(e) => setExtractedData({...extractedData, coordinates: e.target.value})}
+                        className="mt-1"
+                        placeholder="Enter coordinates"
+                      />
                     </div>
                   </CardContent>
                 </Card>
