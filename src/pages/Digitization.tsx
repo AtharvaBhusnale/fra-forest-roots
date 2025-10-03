@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { z } from "zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Upload, 
@@ -21,8 +24,20 @@ import {
   Eye,
   Download,
   RefreshCw,
-  FileUp
+  FileUp,
+  Save,
+  Loader2
 } from "lucide-react";
+
+const extractedDataSchema = z.object({
+  claimantName: z.string().min(1, "Claimant name is required").max(200),
+  village: z.string().min(1, "Village is required").max(200),
+  district: z.string().min(1, "District is required").max(200),
+  state: z.string().min(1, "State is required").max(200),
+  claimType: z.string().min(1, "Claim type is required").max(100),
+  area: z.string().optional(),
+  coordinates: z.string().optional(),
+});
 
 interface ExtractedData {
   claimantName: string;
@@ -38,38 +53,66 @@ interface ExtractedData {
 
 export default function Digitization() {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  
   const [files, setFiles] = useState<FileList | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [progress, setProgress] = useState(0);
   const [extractedData, setExtractedData] = useState<ExtractedData | null>(null);
   const [processingStep, setProcessingStep] = useState("");
+  const [digitizationId, setDigitizationId] = useState<string | null>(null);
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFiles(e.target.files);
     setExtractedData(null);
     setProgress(0);
+    setDigitizationId(null);
+    setFileUrl(null);
   };
 
   const processFiles = async () => {
-    if (!files || files.length === 0) return;
+    if (!files || files.length === 0 || !user) {
+      toast({
+        title: "Error",
+        description: !user ? "You must be logged in" : "Please select a file",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsProcessing(true);
     setProgress(0);
-    setProcessingStep("Preparing images...");
+    setProcessingStep("Uploading document...");
 
     try {
-      const file = files[0]; // Process first file
+      const file = files[0];
       
-      // Convert to base64
-      setProcessingStep("Converting image...");
+      // Upload to storage
       setProgress(20);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage
+        .from('claim-documents')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('claim-documents')
+        .getPublicUrl(fileName);
+
+      setFileUrl(publicUrl);
+      
+      // Convert to base64 for AI
+      setProcessingStep("Converting image...");
+      setProgress(40);
       
       const reader = new FileReader();
       const base64Promise = new Promise<string>((resolve, reject) => {
-        reader.onload = () => {
-          const result = reader.result as string;
-          resolve(result);
-        };
+        reader.onload = () => resolve(reader.result as string);
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
@@ -78,21 +121,21 @@ export default function Digitization() {
 
       // Call AI extraction
       setProcessingStep("Running AI OCR extraction...");
-      setProgress(40);
+      setProgress(60);
 
       const { data, error } = await supabase.functions.invoke('extract-text', {
-        body: { image: base64Image }
+        body: { 
+          imageUrl: publicUrl,
+          fileName: file.name
+        }
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       setProcessingStep("Processing extracted data...");
-      setProgress(70);
+      setProgress(80);
 
       if (data.structuredData) {
-        // Use structured data if available
         setExtractedData({
           claimantName: data.structuredData.claimantName || "",
           village: data.structuredData.village || "",
@@ -105,7 +148,6 @@ export default function Digitization() {
           rawText: data.rawText
         });
       } else {
-        // Fallback to raw text only
         setExtractedData({
           claimantName: "",
           village: "",
@@ -124,7 +166,7 @@ export default function Digitization() {
       
       toast({
         title: "Success",
-        description: "Text extracted successfully from document",
+        description: "Text extracted successfully. Review and save the data.",
       });
 
     } catch (error) {
@@ -141,9 +183,72 @@ export default function Digitization() {
     }
   };
 
-  const saveData = () => {
-    // Simulate saving to database
-    alert("Data saved successfully to FRA database!");
+  const handleSaveDigitization = async () => {
+    if (!extractedData || !user || !fileUrl) {
+      toast({
+        title: "Error",
+        description: "Missing required data",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    
+    try {
+      // Validate extracted data
+      const validatedData = extractedDataSchema.parse(extractedData);
+
+      // Save to digitization_results table
+      const { data, error } = await supabase
+        .from('digitization_results')
+        .insert({
+          user_id: user.id,
+          file_name: files?.[0]?.name || 'document',
+          file_url: fileUrl,
+          raw_text: extractedData.rawText,
+          extracted_data: validatedData,
+          status: 'verified'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setDigitizationId(data.id);
+      
+      toast({
+        title: "Saved!",
+        description: "Digitization data saved successfully. You can now create a claim.",
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Validation Error",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+      } else {
+        console.error('Error saving digitization:', error);
+        toast({
+          title: "Save failed",
+          description: error instanceof Error ? error.message : "Failed to save digitization data.",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCreateClaim = () => {
+    if (!digitizationId) return;
+    navigate('/claim-application', { 
+      state: { 
+        digitizationId,
+        extractedData 
+      } 
+    });
   };
 
   const resetForm = () => {
@@ -152,11 +257,12 @@ export default function Digitization() {
     setProgress(0);
     setIsProcessing(false);
     setProcessingStep("");
+    setDigitizationId(null);
+    setFileUrl(null);
   };
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <div className="border-b border-border bg-card">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
@@ -182,7 +288,6 @@ export default function Digitization() {
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-2">
-          {/* Upload Section */}
           <div className="space-y-6">
             <Card>
               <CardHeader>
@@ -211,7 +316,6 @@ export default function Digitization() {
                           id="files"
                           type="file"
                           className="hidden"
-                          multiple
                           accept=".pdf,.jpg,.jpeg,.png"
                           onChange={handleFileUpload}
                         />
@@ -226,21 +330,17 @@ export default function Digitization() {
                     animate={{ opacity: 1, y: 0 }}
                     className="space-y-2"
                   >
-                    <Label>Selected Files ({files.length})</Label>
-                    <div className="space-y-2">
-                      {Array.from(files).map((file, index) => (
-                        <div key={index} className="flex items-center space-x-2 p-2 border rounded">
-                          {file.type.includes('pdf') ? (
-                            <FileText className="h-4 w-4 text-destructive" />
-                          ) : (
-                            <Image className="h-4 w-4 text-primary" />
-                          )}
-                          <span className="text-sm flex-1">{file.name}</span>
-                          <Badge variant="outline" className="text-xs">
-                            {(file.size / 1024 / 1024).toFixed(2)} MB
-                          </Badge>
-                        </div>
-                      ))}
+                    <Label>Selected File</Label>
+                    <div className="flex items-center space-x-2 p-2 border rounded">
+                      {files[0].type.includes('pdf') ? (
+                        <FileText className="h-4 w-4 text-destructive" />
+                      ) : (
+                        <Image className="h-4 w-4 text-primary" />
+                      )}
+                      <span className="text-sm flex-1">{files[0].name}</span>
+                      <Badge variant="outline" className="text-xs">
+                        {(files[0].size / 1024 / 1024).toFixed(2)} MB
+                      </Badge>
                     </div>
                   </motion.div>
                 )}
@@ -339,7 +439,6 @@ export default function Digitization() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="space-y-6"
               >
-                {/* Extracted Data Preview */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
@@ -355,7 +454,7 @@ export default function Digitization() {
                       </Badge>
                     </CardTitle>
                     <CardDescription>
-                      AI-extracted data from uploaded documents
+                      AI-extracted data - Review and edit before saving
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -364,7 +463,7 @@ export default function Digitization() {
                         <Label className="text-sm font-medium text-muted-foreground">Raw Extracted Text</Label>
                         <Textarea 
                           value={extractedData.rawText} 
-                          className="mt-1 min-h-[120px] font-mono text-xs"
+                          className="mt-1 min-h-[100px] font-mono text-xs"
                           readOnly
                         />
                       </div>
@@ -374,114 +473,108 @@ export default function Digitization() {
                     
                     <div className="grid gap-4 md:grid-cols-2">
                       <div>
-                        <Label className="text-sm font-medium text-muted-foreground">Claimant Name</Label>
+                        <Label>Claimant Name *</Label>
                         <Input 
                           value={extractedData.claimantName} 
                           onChange={(e) => setExtractedData({...extractedData, claimantName: e.target.value})}
                           className="mt-1" 
                           placeholder="Enter claimant name"
+                          required
                         />
                       </div>
                       <div>
-                        <Label className="text-sm font-medium text-muted-foreground">Village</Label>
+                        <Label>Village *</Label>
                         <Input 
                           value={extractedData.village} 
                           onChange={(e) => setExtractedData({...extractedData, village: e.target.value})}
                           className="mt-1"
                           placeholder="Enter village"
+                          required
                         />
                       </div>
                       <div>
-                        <Label className="text-sm font-medium text-muted-foreground">District</Label>
+                        <Label>District *</Label>
                         <Input 
                           value={extractedData.district} 
                           onChange={(e) => setExtractedData({...extractedData, district: e.target.value})}
                           className="mt-1"
                           placeholder="Enter district"
+                          required
                         />
                       </div>
                       <div>
-                        <Label className="text-sm font-medium text-muted-foreground">State</Label>
+                        <Label>State *</Label>
                         <Input 
                           value={extractedData.state} 
                           onChange={(e) => setExtractedData({...extractedData, state: e.target.value})}
                           className="mt-1"
                           placeholder="Enter state"
+                          required
                         />
                       </div>
                       <div>
-                        <Label className="text-sm font-medium text-muted-foreground">Claim Type</Label>
+                        <Label>Claim Type *</Label>
                         <Input 
                           value={extractedData.claimType} 
                           onChange={(e) => setExtractedData({...extractedData, claimType: e.target.value})}
                           className="mt-1"
                           placeholder="Enter claim type"
+                          required
                         />
                       </div>
                       <div>
-                        <Label className="text-sm font-medium text-muted-foreground">Area</Label>
+                        <Label>Area (optional)</Label>
                         <Input 
                           value={extractedData.area} 
                           onChange={(e) => setExtractedData({...extractedData, area: e.target.value})}
                           className="mt-1"
-                          placeholder="Enter area"
+                          placeholder="e.g., 2.5 hectares"
                         />
                       </div>
                     </div>
                     <div>
-                      <Label className="text-sm font-medium text-muted-foreground">Coordinates</Label>
+                      <Label>Coordinates (optional)</Label>
                       <Input 
                         value={extractedData.coordinates} 
                         onChange={(e) => setExtractedData({...extractedData, coordinates: e.target.value})}
                         className="mt-1"
-                        placeholder="Enter coordinates"
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Validation & Actions */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Data Validation</CardTitle>
-                    <CardDescription>
-                      Review and validate extracted information before saving
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center space-x-2 text-fra-success">
-                      <CheckCircle className="h-4 w-4" />
-                      <span className="text-sm">All required fields extracted</span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-fra-success">
-                      <CheckCircle className="h-4 w-4" />
-                      <span className="text-sm">Coordinates format validated</span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-fra-warning">
-                      <AlertCircle className="h-4 w-4" />
-                      <span className="text-sm">Manual verification recommended for claim type</span>
-                    </div>
-
-                    <Separator />
-
-                    <div className="space-y-2">
-                      <Label htmlFor="notes">Validation Notes</Label>
-                      <Textarea 
-                        id="notes"
-                        placeholder="Add any validation notes or corrections..."
-                        className="min-h-[80px]"
+                        placeholder="e.g., 12.9716,77.5946"
                       />
                     </div>
 
-                    <div className="flex space-x-2">
-                      <Button onClick={saveData} className="flex-1" variant="success">
-                        <CheckCircle className="mr-2 h-4 w-4" />
-                        Save to Database
+                    <div className="flex gap-2 pt-4">
+                      <Button 
+                        onClick={handleSaveDigitization}
+                        disabled={isSaving || !!digitizationId}
+                        className="flex-1"
+                      >
+                        {isSaving ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Saving...
+                          </>
+                        ) : digitizationId ? (
+                          <>
+                            <CheckCircle className="mr-2 h-4 w-4" />
+                            Saved
+                          </>
+                        ) : (
+                          <>
+                            <Save className="mr-2 h-4 w-4" />
+                            Save Data
+                          </>
+                        )}
                       </Button>
-                      <Button variant="outline">
-                        <Download className="mr-2 h-4 w-4" />
-                        Export
-                      </Button>
+                      
+                      {digitizationId && (
+                        <Button 
+                          onClick={handleCreateClaim}
+                          variant="default"
+                          className="flex-1"
+                        >
+                          Create Claim
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

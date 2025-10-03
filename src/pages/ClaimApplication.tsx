@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,12 +9,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, FileText, Upload } from 'lucide-react';
+import { Loader2, FileText, Upload, Info } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import DocumentUpload from '@/components/documents/DocumentUpload';
+import { z } from 'zod';
+
+const claimSchema = z.object({
+  claim_type: z.string().min(1, "Claim type is required"),
+  village: z.string().min(1, "Village is required").max(200),
+  district: z.string().min(1, "District is required").max(200),
+  state: z.string().min(1, "State is required").max(200),
+  land_area: z.string().optional(),
+  claim_description: z.string().min(10, "Description must be at least 10 characters").max(2000),
+});
 
 const ClaimApplication = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -22,9 +35,11 @@ const ClaimApplication = () => {
     district: '',
     state: '',
     land_area: '',
-    claim_description: ''
+    claim_description: '',
+    coordinates: ''
   });
   const [documents, setDocuments] = useState<any[]>([]);
+  const [digitizationId, setDigitizationId] = useState<string | null>(null);
 
   const states = [
     'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
@@ -33,6 +48,23 @@ const ClaimApplication = () => {
     'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu',
     'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal'
   ];
+
+  // Pre-fill form from digitization data
+  useEffect(() => {
+    if (location.state?.extractedData) {
+      const extracted = location.state.extractedData;
+      setFormData({
+        claim_type: extracted.claimType === 'Individual Forest Rights' ? 'individual' : 'community',
+        village: extracted.village || '',
+        district: extracted.district || '',
+        state: extracted.state || '',
+        land_area: extracted.area || '',
+        claim_description: `Claim for ${extracted.claimType} in ${extracted.village}, ${extracted.district}`,
+        coordinates: extracted.coordinates || ''
+      });
+      setDigitizationId(location.state.digitizationId);
+    }
+  }, [location.state]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,9 +112,11 @@ const ClaimApplication = () => {
         district: '',
         state: '',
         land_area: '',
-        claim_description: ''
+        claim_description: '',
+        coordinates: ''
       });
       setDocuments([]);
+      setDigitizationId(null);
 
     } catch (error: any) {
       toast({
@@ -222,7 +256,8 @@ const ClaimApplication = () => {
                     district: '',
                     state: '',
                     land_area: '',
-                    claim_description: ''
+                    claim_description: '',
+                    coordinates: ''
                   })}
                 >
                   Reset Form
