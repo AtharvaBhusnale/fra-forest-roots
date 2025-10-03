@@ -48,6 +48,8 @@ export type Database = {
         Row: {
           claim_description: string
           claim_type: string
+          coordinates: Json | null
+          digitization_result_id: string | null
           district: string
           documents: Json | null
           id: string
@@ -64,6 +66,8 @@ export type Database = {
         Insert: {
           claim_description: string
           claim_type: string
+          coordinates?: Json | null
+          digitization_result_id?: string | null
           district: string
           documents?: Json | null
           id?: string
@@ -80,6 +84,8 @@ export type Database = {
         Update: {
           claim_description?: string
           claim_type?: string
+          coordinates?: Json | null
+          digitization_result_id?: string | null
           district?: string
           documents?: Json | null
           id?: string
@@ -92,6 +98,45 @@ export type Database = {
           submitted_at?: string
           user_id?: string
           village?: string
+        }
+        Relationships: []
+      }
+      digitization_results: {
+        Row: {
+          claim_id: string | null
+          created_at: string
+          extracted_data: Json | null
+          file_name: string
+          file_url: string
+          id: string
+          raw_text: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          claim_id?: string | null
+          created_at?: string
+          extracted_data?: Json | null
+          file_name: string
+          file_url: string
+          id?: string
+          raw_text?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          claim_id?: string | null
+          created_at?: string
+          extracted_data?: Json | null
+          file_name?: string
+          file_url?: string
+          id?: string
+          raw_text?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
