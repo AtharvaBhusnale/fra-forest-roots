@@ -81,23 +81,43 @@ const ClaimApplication = () => {
     setIsSubmitting(true);
 
     try {
+      // Validate form data
+      const validatedData = claimSchema.parse(formData);
+
+      // Parse coordinates if provided
+      let coordinatesJson = null;
+      if (formData.coordinates) {
+        const coords = formData.coordinates.split(',').map(c => parseFloat(c.trim()));
+        if (coords.length === 2 && !coords.some(isNaN)) {
+          coordinatesJson = { lat: coords[0], lng: coords[1] };
+        }
+      }
+
       const { data: claimData, error } = await supabase
         .from('claims')
         .insert({
           user_id: user.id,
-          claim_type: formData.claim_type,
-          village: formData.village,
-          district: formData.district,
-          state: formData.state,
-          land_area: parseFloat(formData.land_area),
-          claim_description: formData.claim_description,
-          documents: documents
+          claim_type: validatedData.claim_type,
+          village: validatedData.village,
+          district: validatedData.district,
+          state: validatedData.state,
+          land_area: validatedData.land_area ? parseFloat(validatedData.land_area) : null,
+          claim_description: validatedData.claim_description,
+          documents: documents,
+          coordinates: coordinatesJson,
+          digitization_result_id: digitizationId
         })
         .select()
         .single();
 
-      if (error) {
-        throw error;
+      if (error) throw error;
+
+      // Update digitization result with claim_id if exists
+      if (digitizationId) {
+        await supabase
+          .from('digitization_results')
+          .update({ claim_id: claimData.id })
+          .eq('id', digitizationId);
       }
 
       toast({
@@ -119,15 +139,24 @@ const ClaimApplication = () => {
       setDigitizationId(null);
 
     } catch (error: any) {
-      toast({
-        title: "Submission Failed",
-        description: error.message || "Failed to submit claim. Please try again.",
-        variant: "destructive"
-      });
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Validation Error",
+          description: error.errors[0].message,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Submission Failed",
+          description: error.message || "Failed to submit claim. Please try again.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
