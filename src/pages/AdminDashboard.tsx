@@ -13,6 +13,7 @@ import { Loader2, Shield, UserPlus, Users, Activity, FileText } from 'lucide-rea
 import ClaimsTable from '@/components/claims/ClaimsTable';
 import { AuditLog } from '@/components/admin/AuditLog';
 import { ExportDialog } from '@/components/admin/ExportDialog';
+import { AnalyticsDashboard } from '@/components/analytics/AnalyticsDashboard';
 
 interface AdminAction {
   id: string;
@@ -180,10 +181,14 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs defaultValue="claims-review" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="claims-review" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Claims Review
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <Activity className="h-4 w-4" />
+              Analytics
             </TabsTrigger>
             <TabsTrigger value="create-official" className="flex items-center gap-2">
               <UserPlus className="h-4 w-4" />
@@ -206,6 +211,10 @@ const AdminDashboard = () => {
               </div>
               <ClaimsTable />
             </div>
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <AnalyticsDashboard />
           </TabsContent>
 
           <TabsContent value="create-official">

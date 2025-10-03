@@ -9,10 +9,13 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Search, Filter, Eye, FileText, Download, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { BulkActions } from '@/components/admin/BulkActions';
+import { AdvancedFilters } from '@/components/admin/AdvancedFilters';
 
 interface Claim {
   id: string;
@@ -50,9 +53,32 @@ const ClaimsTable = () => {
   const [reviewRemarks, setReviewRemarks] = useState('');
   const [newStatus, setNewStatus] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [selectedClaims, setSelectedClaims] = useState<string[]>([]);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [advancedFilters, setAdvancedFilters] = useState<any>({});
 
   useEffect(() => {
     fetchClaims();
+    
+    // Set up realtime subscription
+    const channel = supabase
+      .channel('claims-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'claims'
+        },
+        () => {
+          fetchClaims();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user, isOfficial]);
 
   const fetchClaims = async () => {
@@ -81,6 +107,28 @@ const ClaimsTable = () => {
   };
 
   const filteredClaims = claims.filter(claim => {
+    // Apply advanced filters if set
+    if (advancedFilters.search && !claim.village.toLowerCase().includes(advancedFilters.search.toLowerCase()) &&
+        !claim.district.toLowerCase().includes(advancedFilters.search.toLowerCase()) &&
+        !claim.claim_type.toLowerCase().includes(advancedFilters.search.toLowerCase())) {
+      return false;
+    }
+    if (advancedFilters.status && advancedFilters.status !== 'all' && claim.status !== advancedFilters.status) {
+      return false;
+    }
+    if (advancedFilters.claimType && advancedFilters.claimType !== 'all' && claim.claim_type !== advancedFilters.claimType) {
+      return false;
+    }
+    if (advancedFilters.state && advancedFilters.state !== 'all' && claim.state !== advancedFilters.state) {
+      return false;
+    }
+    if (advancedFilters.startDate && new Date(claim.submitted_at) < advancedFilters.startDate) {
+      return false;
+    }
+    if (advancedFilters.endDate && new Date(claim.submitted_at) > advancedFilters.endDate) {
+      return false;
+    }
+
     const matchesSearch = claim.village.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          claim.district.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          claim.claim_type.toLowerCase().includes(searchTerm.toLowerCase());
@@ -95,6 +143,14 @@ const ClaimsTable = () => {
 
     try {
       setSubmitting(true);
+      
+      // Fetch user profile for email
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, email')
+        .eq('user_id', selectedClaim.user_id)
+        .single();
+
       const { error } = await supabase
         .from('claims')
         .update({
@@ -107,9 +163,22 @@ const ClaimsTable = () => {
 
       if (error) throw error;
 
+      // Send email notification
+      if (profile?.email) {
+        await supabase.functions.invoke('send-notification-email', {
+          body: {
+            to: profile.email,
+            claimId: selectedClaim.id,
+            status: newStatus,
+            remarks: reviewRemarks,
+            userName: profile.full_name
+          }
+        });
+      }
+
       toast({
         title: "Claim Updated",
-        description: "Claim status has been updated successfully"
+        description: "Claim status has been updated and user notified via email"
       });
 
       fetchClaims();
@@ -194,13 +263,37 @@ const ClaimsTable = () => {
               {isOfficial ? 'Review and manage all submitted claims' : 'View your submitted claims'}
             </CardDescription>
           </div>
-          <Button onClick={exportClaims} variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Export CSV
-          </Button>
+          <div className="flex gap-2">
+            {isOfficial && (
+              <>
+                <BulkActions selectedClaims={selectedClaims} onComplete={() => {
+                  setSelectedClaims([]);
+                  fetchClaims();
+                }} />
+                <Button
+                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Filter className="h-4 w-4 mr-2" />
+                  Advanced Filters
+                </Button>
+              </>
+            )}
+            <Button onClick={exportClaims} variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
+        {/* Advanced Filters */}
+        {showAdvancedFilters && isOfficial && (
+          <div className="mb-6">
+            <AdvancedFilters onFilterChange={setAdvancedFilters} />
+          </div>
+        )}
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="flex-1">
@@ -252,6 +345,20 @@ const ClaimsTable = () => {
           <Table>
             <TableHeader>
               <TableRow>
+                {isOfficial && (
+                  <TableHead className="w-12">
+                    <Checkbox
+                      checked={selectedClaims.length === filteredClaims.length && filteredClaims.length > 0}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedClaims(filteredClaims.map(c => c.id));
+                        } else {
+                          setSelectedClaims([]);
+                        }
+                      }}
+                    />
+                  </TableHead>
+                )}
                 <TableHead>Type</TableHead>
                 <TableHead>Location</TableHead>
                 <TableHead>Land Area</TableHead>
@@ -263,13 +370,27 @@ const ClaimsTable = () => {
             <TableBody>
               {filteredClaims.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={isOfficial ? 7 : 6} className="text-center py-8 text-muted-foreground">
                     No claims found matching your filters
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredClaims.map((claim) => (
                   <TableRow key={claim.id}>
+                    {isOfficial && (
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedClaims.includes(claim.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedClaims([...selectedClaims, claim.id]);
+                            } else {
+                              setSelectedClaims(selectedClaims.filter(id => id !== claim.id));
+                            }
+                          }}
+                        />
+                      </TableCell>
+                    )}
                     <TableCell className="font-medium">
                       {claim.claim_type.replace('_', ' ').toUpperCase()}
                     </TableCell>
