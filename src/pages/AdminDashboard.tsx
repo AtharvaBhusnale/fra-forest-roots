@@ -11,6 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Shield, UserPlus, Users, Activity, FileText } from 'lucide-react';
 import ClaimsTable from '@/components/claims/ClaimsTable';
+import { AuditLog } from '@/components/admin/AuditLog';
+import { ExportDialog } from '@/components/admin/ExportDialog';
 
 interface AdminAction {
   id: string;
@@ -198,7 +200,12 @@ const AdminDashboard = () => {
           </TabsList>
 
           <TabsContent value="claims-review">
-            <ClaimsTable />
+            <div className="space-y-4">
+              <div className="flex justify-end">
+                <ExportDialog />
+              </div>
+              <ClaimsTable />
+            </div>
           </TabsContent>
 
           <TabsContent value="create-official">
@@ -297,40 +304,7 @@ const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="audit-log">
-            <Card>
-              <CardHeader>
-                <CardTitle>Audit Log</CardTitle>
-                <CardDescription>
-                  Recent administrative actions performed in the system.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Action</TableHead>
-                      <TableHead>Details</TableHead>
-                      <TableHead>Timestamp</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {adminActions.map((action) => (
-                      <TableRow key={action.id}>
-                        <TableCell className="font-medium">
-                          {action.action_type.replace('_', ' ').toUpperCase()}
-                        </TableCell>
-                        <TableCell>
-                          {action.details?.email || action.details?.full_name || 'N/A'}
-                        </TableCell>
-                        <TableCell>
-                          {new Date(action.created_at).toLocaleString()}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+            <AuditLog />
           </TabsContent>
         </Tabs>
       </div>
