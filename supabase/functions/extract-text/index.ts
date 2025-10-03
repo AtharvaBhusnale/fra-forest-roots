@@ -11,14 +11,16 @@ serve(async (req) => {
   }
 
   try {
-    const { image } = await req.json();
+    const { imageUrl, fileName } = await req.json();
     
-    if (!image) {
+    if (!imageUrl) {
       return new Response(
-        JSON.stringify({ error: 'No image provided' }),
+        JSON.stringify({ error: 'No image URL provided' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    console.log(`Processing document: ${fileName || 'unknown'}`);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -54,7 +56,7 @@ serve(async (req) => {
               {
                 type: "image_url",
                 image_url: {
-                  url: image
+                  url: imageUrl
                 }
               }
             ]
