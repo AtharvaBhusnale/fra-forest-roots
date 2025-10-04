@@ -69,67 +69,43 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-primary text-primary-foreground py-16 sm:py-24">
+      <section className="relative overflow-hidden bg-primary text-primary-foreground py-20 sm:py-28">
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-left"
           >
-            <h1 className="max-w-4xl text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl mb-6">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
               FRA Atlas Dashboard
             </h1>
-            <p className="max-w-3xl text-lg leading-8 opacity-90 mb-4">
+            <p className="text-lg sm:text-xl max-w-3xl mb-2">
               Comprehensive digital platform for Forest Rights Act monitoring, asset mapping,
             </p>
-            <p className="max-w-3xl text-lg leading-8 opacity-90 mb-8">
+            <p className="text-lg sm:text-xl max-w-3xl mb-10">
               and decision support powered by AI and satellite technology
             </p>
             <div className="flex flex-wrap gap-4">
-              {!user ? (
-                <>
-                  <Button variant="secondary" size="lg" asChild>
-                    <Link to="/digitization">
-                      Digitize Documents
-                    </Link>
-                  </Button>
-                  
-                  <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/20" asChild>
-                    <Link to="/dss">
-                      Check Scheme Eligibility
-                    </Link>
-                  </Button>
-                </>
-              ) : isOfficial ? (
-                <>
-                  <Button variant="secondary" size="lg" asChild>
-                    <Link to="/digitization">
-                      Digitize Documents
-                    </Link>
-                  </Button>
-                  
-                  <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/20" asChild>
-                    <Link to="/dss">
-                      Check Scheme Eligibility
-                    </Link>
-                  </Button>
-                </>
-              ) : isCitizen ? (
-                <>
-                  <Button variant="secondary" size="lg" asChild>
-                    <Link to="/apply-claim">
-                      Apply for Claim
-                    </Link>
-                  </Button>
-                  
-                  <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/20" asChild>
-                    <Link to="/my-claims">
-                      View My Claims
-                    </Link>
-                  </Button>
-                </>
-              ) : null}
+              <Button 
+                size="lg" 
+                className="bg-white text-foreground hover:bg-white/90 font-medium px-8"
+                asChild
+              >
+                <Link to="/digitization">
+                  Digitize Documents
+                </Link>
+              </Button>
+              
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="border-2 border-white text-white hover:bg-white/10 font-medium px-8"
+                asChild
+              >
+                <Link to="/dss">
+                  Check Scheme Eligibility
+                </Link>
+              </Button>
             </div>
           </motion.div>
         </div>

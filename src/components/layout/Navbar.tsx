@@ -42,33 +42,12 @@ const Navbar = () => {
 
   const getNavItems = () => {
     const baseItems = [
-      { name: "Home", path: "/", icon: Home },
-    ];
-
-    if (user) {
-      if (profile?.role === 'super_admin') {
-        baseItems.push(
-          { name: "Admin Dashboard", path: "/admin", icon: Shield }
-        );
-      } else if (isOfficial) {
-        baseItems.push(
-          { name: "Atlas", path: "/atlas", icon: Map },
-          { name: "DSS", path: "/dss", icon: BarChart3 },
-          { name: "Dashboard", path: "/dashboard", icon: Database },
-          { name: "Digitization", path: "/digitization", icon: Upload }
-        );
-      } else if (isCitizen) {
-        baseItems.push(
-          { name: "Apply for Claim", path: "/apply-claim", icon: FileText },
-          { name: "My Claims", path: "/my-claims", icon: Database }
-        );
-      }
-    }
-
-    baseItems.push(
+      { name: "FRA Atlas", path: "/atlas", icon: Map },
+      { name: "Data Digitization", path: "/digitization", icon: Upload },
+      { name: "Asset Mapping", path: "/atlas", icon: Map },
+      { name: "Decision Support", path: "/dss", icon: BarChart3 },
       { name: "About", path: "/about", icon: Info },
-      { name: "Contact", path: "/contact", icon: Mail }
-    );
+    ];
 
     return baseItems;
   };
@@ -91,24 +70,22 @@ const Navbar = () => {
       <nav className="sticky top-0 z-50 bg-background border-b border-border shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-          <div className="flex items-center">
+          <div className="flex items-center gap-4">
             <Link to="/" className="flex-shrink-0">
-              <div className="flex items-center space-x-4">
-                <img 
-                  src="/src/assets/fra-atlas-logo.png" 
-                  alt="National Emblem" 
-                  className="h-14 w-auto"
-                />
-                <div className="flex flex-col">
-                  <span className="text-foreground font-bold text-xl">
-                    FRA Atlas
-                  </span>
-                  <span className="text-muted-foreground text-xs">
-                    Forest Rights Act 2006
-                  </span>
-                </div>
-              </div>
+              <img 
+                src="/src/assets/fra-atlas-logo.png" 
+                alt="National Emblem" 
+                className="h-16 w-auto"
+              />
             </Link>
+            <div className="flex flex-col border-l border-border pl-4">
+              <span className="text-foreground font-bold text-xl">
+                FRA Atlas
+              </span>
+              <span className="text-muted-foreground text-sm">
+                Forest Rights Act 2006
+              </span>
+            </div>
           </div>
 
           {/* Desktop Navigation */}
@@ -120,10 +97,10 @@ const Navbar = () => {
                   <Link
                     key={item.name}
                     to={item.path}
-                    className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                    className={`px-4 py-2 text-base font-medium transition-all duration-200 ${
                       isActive(item.path)
-                        ? "text-primary border-b-2 border-primary"
-                        : "text-foreground hover:text-primary"
+                        ? "text-foreground font-semibold"
+                        : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     <span>{item.name}</span>
