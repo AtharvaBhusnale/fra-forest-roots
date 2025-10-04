@@ -57,35 +57,20 @@ const Navbar = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <>
-      {/* Top Government Bar */}
-      <div className="bg-primary text-primary-foreground py-2">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center text-sm">
-          <span>Government of India | Ministry of Tribal Affairs</span>
-          <span>FRA Atlas & Decision Support System</span>
-        </div>
-      </div>
-      
-      {/* Main Navigation */}
-      <nav className="sticky top-0 z-50 bg-background border-b border-border shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-          <div className="flex items-center gap-4">
+    <nav className="sticky top-0 z-50 bg-background border-b border-border shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center">
             <Link to="/" className="flex-shrink-0">
-              <img 
-                src="/src/assets/fra-atlas-logo.png" 
-                alt="National Emblem" 
-                className="h-16 w-auto"
-              />
+              <div className="flex flex-col">
+                <span className="text-foreground font-bold text-xl">
+                  FRA Atlas & Decision Support System
+                </span>
+                <span className="text-muted-foreground text-sm">
+                  Forest Rights Act 2006
+                </span>
+              </div>
             </Link>
-            <div className="flex flex-col border-l border-border pl-4">
-              <span className="text-foreground font-bold text-xl">
-                FRA Atlas
-              </span>
-              <span className="text-muted-foreground text-sm">
-                Forest Rights Act 2006
-              </span>
-            </div>
           </div>
 
           {/* Desktop Navigation */}
@@ -240,7 +225,6 @@ const Navbar = () => {
         </AnimatePresence>
       </div>
     </nav>
-    </>
   );
 };
 
