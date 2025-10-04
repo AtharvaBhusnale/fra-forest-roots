@@ -18,7 +18,8 @@ const AuthPage = () => {
 
   const [signInForm, setSignInForm] = useState({
     email: '',
-    password: ''
+    password: '',
+    accountType: 'citizen'
   });
 
   const [signUpForm, setSignUpForm] = useState({
@@ -120,6 +121,21 @@ const AuthPage = () => {
             
             <TabsContent value="signin" className="space-y-4">
               <form onSubmit={handleSignIn} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="account-type">Account Type</Label>
+                  <Select
+                    value={signInForm.accountType}
+                    onValueChange={(value) => setSignInForm({ ...signInForm, accountType: value })}
+                  >
+                    <SelectTrigger id="account-type">
+                      <SelectValue placeholder="Select account type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="citizen">Citizen</SelectItem>
+                      <SelectItem value="official">Government Official</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="signin-email">Email</Label>
                   <Input

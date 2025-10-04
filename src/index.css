@@ -17,11 +17,11 @@ All colors MUST be HSL.
     --popover: 44 21% 99%;
     --popover-foreground: 142 71% 8%;
 
-    /* Forest Green Primary */
-    --primary: 142 71% 25%;
-    --primary-foreground: 44 21% 99%;
-    --primary-glow: 142 71% 35%;
-    --primary-dark: 142 71% 20%;
+    /* Orange Primary - Government Theme */
+    --primary: 16 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 16 100% 60%;
+    --primary-dark: 16 100% 40%;
 
     /* Earth Tone Secondary */
     --secondary: 35 25% 88%;
@@ -95,10 +95,10 @@ All colors MUST be HSL.
     --popover: 142 20% 10%;
     --popover-foreground: 44 21% 95%;
 
-    --primary: 142 71% 45%;
-    --primary-foreground: 142 15% 8%;
-    --primary-glow: 142 71% 55%;
-    --primary-dark: 142 71% 30%;
+    --primary: 16 100% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 16 100% 70%;
+    --primary-dark: 16 100% 50%;
 
     --secondary: 35 15% 15%;
     --secondary-foreground: 44 21% 95%;

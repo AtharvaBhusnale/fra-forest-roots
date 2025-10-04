@@ -78,18 +78,35 @@ const Navbar = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="sticky top-0 z-50 bg-gradient-to-r from-primary to-primary-dark shadow-xl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+    <>
+      {/* Top Government Bar */}
+      <div className="bg-primary text-primary-foreground py-2">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center text-sm">
+          <span>Government of India | Ministry of Tribal Affairs</span>
+          <span>FRA Atlas & Decision Support System</span>
+        </div>
+      </div>
+      
+      {/* Main Navigation */}
+      <nav className="sticky top-0 z-50 bg-background border-b border-border shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                  <span className="text-white font-bold text-lg">F</span>
+              <div className="flex items-center space-x-4">
+                <img 
+                  src="/src/assets/fra-atlas-logo.png" 
+                  alt="National Emblem" 
+                  className="h-14 w-auto"
+                />
+                <div className="flex flex-col">
+                  <span className="text-foreground font-bold text-xl">
+                    FRA Atlas
+                  </span>
+                  <span className="text-muted-foreground text-xs">
+                    Forest Rights Act 2006
+                  </span>
                 </div>
-                <span className="text-white font-bold text-xl hidden sm:block">
-                  FRA Portal
-                </span>
               </div>
             </Link>
           </div>
@@ -105,11 +122,10 @@ const Navbar = () => {
                     to={item.path}
                     className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                       isActive(item.path)
-                        ? "bg-white/20 text-white backdrop-blur-sm"
-                        : "text-white/80 hover:bg-white/10 hover:text-white"
+                        ? "text-primary border-b-2 border-primary"
+                        : "text-foreground hover:text-primary"
                     }`}
                   >
-                    <Icon className="h-4 w-4" />
                     <span>{item.name}</span>
                   </Link>
                 );
@@ -123,21 +139,21 @@ const Navbar = () => {
               variant="ghost"
               size="icon"
               onClick={toggleDarkMode}
-              className="text-white hover:bg-white/20"
+              className="hover:bg-muted"
             >
               {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
 
             {user ? (
               <div className="flex items-center gap-2">
-                <span className="text-white/90 text-sm hidden md:block">
+                <span className="text-foreground text-sm hidden md:block">
                   {profile?.full_name} ({profile?.role})
                 </span>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={handleSignOut}
-                  className="text-white hover:bg-white/20"
+                  className="hover:bg-muted"
                   title="Sign Out"
                 >
                   <LogOut className="h-5 w-5" />
@@ -148,7 +164,7 @@ const Navbar = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-white hover:bg-white/20"
+                  className="hover:bg-muted"
                   title="Sign In"
                 >
                   <LogIn className="h-5 w-5" />
@@ -163,7 +179,7 @@ const Navbar = () => {
               variant="ghost"
               size="icon"
               onClick={() => setIsOpen(!isOpen)}
-              className="text-white hover:bg-white/20"
+              className="hover:bg-muted"
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
@@ -247,6 +263,7 @@ const Navbar = () => {
         </AnimatePresence>
       </div>
     </nav>
+    </>
   );
 };
 

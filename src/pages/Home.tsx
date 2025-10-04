@@ -69,81 +69,62 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 sm:py-32">
-        <div className="absolute inset-0 bg-gradient-hero opacity-5"></div>
+      <section className="relative overflow-hidden bg-primary text-primary-foreground py-16 sm:py-24">
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center"
+            className="text-left"
           >
-            <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-glow">
-              <img src={fraLogo} alt="FRA Atlas Logo" className="h-12 w-12 object-contain" />
-            </div>
-            <h1 className="mx-auto max-w-4xl text-4xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
-              AI-Powered{" "}
-              <span className="bg-gradient-primary bg-clip-text text-transparent">
-                FRA Atlas
-              </span>{" "}
-              & Decision Support System
+            <h1 className="max-w-4xl text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl mb-6">
+              FRA Atlas Dashboard
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
-              Digitize legacy FRA data, visualize claims through WebGIS, and get AI-powered 
-              recommendations for CSS scheme eligibility. Empowering forest communities with technology.
+            <p className="max-w-3xl text-lg leading-8 opacity-90 mb-4">
+              Comprehensive digital platform for Forest Rights Act monitoring, asset mapping,
             </p>
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center">
+            <p className="max-w-3xl text-lg leading-8 opacity-90 mb-8">
+              and decision support powered by AI and satellite technology
+            </p>
+            <div className="flex flex-wrap gap-4">
               {!user ? (
                 <>
-                  <Button variant="hero" size="xl" asChild>
-                    <Link to="/auth">
-                      <LogIn className="mr-2 h-5 w-5" />
-                      Sign In
+                  <Button variant="secondary" size="lg" asChild>
+                    <Link to="/digitization">
+                      Digitize Documents
                     </Link>
                   </Button>
                   
-                  <Button variant="outline" size="xl" asChild>
-                    <Link to="/auth">
-                      <UserPlus className="mr-2 h-5 w-5" />
-                      Register
+                  <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/20" asChild>
+                    <Link to="/dss">
+                      Check Scheme Eligibility
                     </Link>
                   </Button>
                 </>
               ) : isOfficial ? (
                 <>
-                  <Button variant="hero" size="xl" asChild>
-                    <Link to="/atlas">
-                      <MapPin className="mr-2 h-5 w-5" />
-                      Explore Atlas
+                  <Button variant="secondary" size="lg" asChild>
+                    <Link to="/digitization">
+                      Digitize Documents
                     </Link>
                   </Button>
                   
-                  <Button variant="outline" size="xl" asChild>
+                  <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/20" asChild>
                     <Link to="/dss">
-                      <Brain className="mr-2 h-5 w-5" />
-                      Try DSS
-                    </Link>
-                  </Button>
-                  
-                  <Button variant="earth" size="xl" asChild>
-                    <Link to="/dashboard">
-                      <Database className="mr-2 h-5 w-5" />
-                      Dashboard
+                      Check Scheme Eligibility
                     </Link>
                   </Button>
                 </>
               ) : isCitizen ? (
                 <>
-                  <Button variant="hero" size="xl" asChild>
+                  <Button variant="secondary" size="lg" asChild>
                     <Link to="/apply-claim">
-                      <FileText className="mr-2 h-5 w-5" />
                       Apply for Claim
                     </Link>
                   </Button>
                   
-                  <Button variant="outline" size="xl" asChild>
+                  <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/20" asChild>
                     <Link to="/my-claims">
-                      <Database className="mr-2 h-5 w-5" />
                       View My Claims
                     </Link>
                   </Button>
@@ -155,53 +136,35 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 sm:py-24">
+      <section className="py-16 sm:py-24 bg-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
-              Impact & Progress
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              Real-time statistics from our FRA digitization and mapping efforts
-            </p>
-          </motion.div>
-
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <StatsCard
-              title="Total FRA Claims"
-              value={mockStats.totalClaims.toLocaleString()}
-              description="Claims processed across states"
-              icon={TreePine}
-              trend="+12%"
+              title="Total Claims"
+              value="4.2M"
+              description="Claims processed"
+              icon={FileText}
               color="primary"
             />
             <StatsCard
-              title="Approved Claims"
-              value={mockStats.approvedClaims.toLocaleString()}
-              description="Successfully approved claims"
+              title="Titles Granted"
+              value="1.8M"
+              description="Successfully approved"
               icon={CheckCircle}
-              trend="+8%"
               color="success"
             />
             <StatsCard
-              title="Villages Covered"
-              value={mockStats.villagesCovered.toLocaleString()}
-              description="Villages with FRA mapping"
+              title="Beneficiaries"
+              value="9.5M"
+              description="People benefiting"
               icon={Users}
-              trend="+15%"
               color="info"
             />
             <StatsCard
-              title="Assets Mapped"
-              value={mockStats.assetsMapped.toLocaleString()}
-              description="AI-detected land assets"
+              title="Area Covered"
+              value="5.2M ha"
+              description="Total area"
               icon={Satellite}
-              trend="+23%"
               color="warning"
             />
           </div>
